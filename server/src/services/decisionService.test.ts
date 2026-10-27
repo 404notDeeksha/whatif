@@ -28,6 +28,15 @@ const analysis = {
   brief: false,
 };
 
+// Valid under the schema — everything except one overflowing field.
+const cappedAnalysis = () => ({
+  ...analysis,
+  recommendation: {
+    ...analysis.recommendation,
+    reasoning: 'x'.repeat(601), // cap is 600
+  },
+});
+
 beforeEach(() => {
   callLlmMock.mockReset();
 });
@@ -58,6 +67,15 @@ describe('runDecision — assess', () => {
       ],
     });
     expect(callLlmMock).toHaveBeenCalledOnce();
+  });
+
+  it('pins that an analysis-shaped value flows through to complete', async () => {
+    callLlmMock.mockResolvedValue({ status: 'complete', analysis: cappedAnalysis() });
+
+    // callLlm is mocked here; its schema validation is covered in analysis.test.ts.
+    await expect(
+      runDecision({ stage: 'assess', dilemma: 'Job A or Job B?' }),
+    ).resolves.toMatchObject({ kind: 'complete' });
   });
 
   it('returns a complete analysis when the model is done in one pass', async () => {
@@ -106,5 +124,7 @@ describe('runDecision — analyze', () => {
     expect(promptArg.prompt).toContain('"mode":"analyze"');
     expect(promptArg.prompt).toContain('What matters more?');
     expect(promptArg.prompt).toContain('salary');
+    expect(promptArg.prompt).toContain('do NOT ask questions now');
+    expect(promptArg.prompt).toContain('under ~15 words');
   });
 });
