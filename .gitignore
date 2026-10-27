@@ -35,3 +35,6 @@ __pycache__/
 
 # Test coverage
 coverage/
+
+# TypeScript build info
+*.tsbuildinfo
