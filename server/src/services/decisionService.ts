@@ -44,26 +44,35 @@ export async function runDecision(input: DecisionInput): Promise<DecisionOutcome
     payload.answers = input.answers;
   }
 
-  // Two assembly-time nudges (Phase 3 addition; the frozen Phase 2 prompt is
-  // never edited): free/live models occasionally ignore the mode or overrun
-  // lengths, so restate the contract right before the payload.
-  const modeNudge =
-    input.stage === 'analyze'
-      ? `Mode is "analyze": you MUST return exactly one JSON object with the key
-"analysis" — do NOT ask questions now; the user's answers are above.`
-      : `Mode is "assess": return EITHER questions OR an analysis, never both.`;
+  // Assembly-time bindings (Phase 3 addition; the frozen Phase 2 prompt is
+  // never edited). Live models on free tiers sometimes replay questions in
+  // analyze mode even when answers are in hand, so the binding comes FIRST
+  // (before the payload) and is repeated LAST (after it).
+  const analyzeBinding = `BINDING — mode "analyze". The user already answered the
+follow-up questions below; this is the final answer pass, not a new question round.
+- Return exactly one JSON object of the form {"analysis": <Analysis>}.
+- Do NOT ask any question. "needs_info" is forbidden in this mode.
+- If an answer flags something unknown, work with what was given and place the
+  missing factor in the analysis (blindSpot / recommendation.changeIf).`;
+  const assessBinding = `BINDING — mode "assess". Return EITHER an analysis OR
+questions, never both, per the ground rules.`;
+  const binding = input.stage === 'analyze' ? analyzeBinding : assessBinding;
   const brevityNudge = `Keep every list item to one short line (under ~15 words).
 Keep sentences short; respect all length limits in the rules.`;
+
+  const inputBlock = `Input:
+${JSON.stringify(payload)}`;
 
   const prompt = [
     systemPrompt,
     '',
-    '## Call instructions (binding)',
-    modeNudge,
+    binding,
+    '',
     brevityNudge,
     '',
-    'Input:',
-    JSON.stringify(payload),
+    inputBlock,
+    '',
+    `FINAL REMINDER: ${input.stage === 'analyze' ? 'reply with {"analysis": <Analysis>} only; asking anything is forbidden.' : 'reply with EITHER {"status":"complete",...} OR {"status":"needs_info",...} only.'}`,
   ].join('\n');
 
   // The model may reply with the unsupported-input error object in any mode,

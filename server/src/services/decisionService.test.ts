@@ -124,7 +124,9 @@ describe('runDecision — analyze', () => {
     expect(promptArg.prompt).toContain('"mode":"analyze"');
     expect(promptArg.prompt).toContain('What matters more?');
     expect(promptArg.prompt).toContain('salary');
-    expect(promptArg.prompt).toContain('do NOT ask questions now');
+    expect(promptArg.prompt).toContain('Do NOT ask any question');
+    expect(promptArg.prompt).toContain('needs_info" is forbidden in this mode');
     expect(promptArg.prompt).toContain('under ~15 words');
+    expect(promptArg.prompt).toContain('FINAL REMINDER: reply with {"analysis": <Analysis>} only');
   });
 });
