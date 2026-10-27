@@ -6,26 +6,36 @@ import { z } from 'zod';
 
 // ---------- Shared LLM output ----------
 
+/**
+ * Brevity guarantees (validate-only: overflow = reject, never truncate).
+ * Aimed at a complete analysis readable in one screen.
+ */
+const ITEM_LIMIT = 160; // chars per list item
+const SENTENCE_LIMIT = 300; // chars per 1-2-sentence field
+
+const itemList = (maxItems: number) =>
+  z.array(z.string().min(1).max(ITEM_LIMIT)).max(maxItems);
+
 export const analysisSchema = z.object({
-  restatement: z.string().min(1),
-  priorities: z.array(z.string()),
-  constraints: z.array(z.string()),
+  restatement: z.string().min(1).max(SENTENCE_LIMIT),
+  priorities: itemList(6),
+  constraints: itemList(6),
   options: z
     .array(
       z.object({
-        name: z.string().min(1),
-        pros: z.array(z.string()),
-        cons: z.array(z.string()),
-        tradeoffs: z.array(z.string()),
+        name: z.string().min(1).max(80),
+        pros: itemList(3),
+        cons: itemList(3),
+        tradeoffs: itemList(3),
       }),
     )
     .min(2)
     .max(4),
-  blindSpot: z.string().min(1),
+  blindSpot: z.string().min(1).max(SENTENCE_LIMIT),
   recommendation: z.object({
-    choice: z.string().min(1),
-    reasoning: z.string().min(1),
-    changeIf: z.array(z.string()),
+    choice: z.string().min(1).max(80),
+    reasoning: z.string().min(1).max(600),
+    changeIf: itemList(3),
   }),
   brief: z.boolean(),
 });
