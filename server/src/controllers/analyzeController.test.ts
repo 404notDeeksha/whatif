@@ -74,6 +74,9 @@ describe('POST /api/analyze', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.analysis.recommendation.choice).toBe('A');
+    // Regression: the request must reach analyze mode, not be swallowed by
+    // the dilemma-only union variant (which would send mode "assess").
+    expect(callLlmMock.mock.calls[0]![0].prompt).toContain('"mode":"analyze"');
   });
 
   it('returns 422 for non-decision input', async () => {

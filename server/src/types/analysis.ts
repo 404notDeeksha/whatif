@@ -70,12 +70,14 @@ const MAX_DILEMMA_LENGTH = 500;
 const MAX_ANSWER_LENGTH = 500;
 
 export const analyzeRequestSchema = z.union([
-  z.object({ dilemma: z.string().trim().min(1).max(MAX_DILEMMA_LENGTH) }),
+  // Full shape FIRST: unions match the first variant, and a dilemma-only
+  // object would otherwise swallow this variant (extra keys are ignored).
   z.object({
     dilemma: z.string().trim().min(1).max(MAX_DILEMMA_LENGTH),
     questions: z.array(questionSchema).min(1).max(4),
     answers: z.array(z.string().max(MAX_ANSWER_LENGTH)).min(1).max(4),
   }),
+  z.object({ dilemma: z.string().trim().min(1).max(MAX_DILEMMA_LENGTH) }),
 ]);
 
 export const unsupportedInputSchema = z.object({
