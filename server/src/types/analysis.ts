@@ -46,7 +46,10 @@ export const questionSchema = z.object({
 
 export const assessResponseSchema = z.discriminatedUnion('status', [
   z.object({ status: z.literal('complete'), analysis: analysisSchema }),
-  z.object({ status: z.literal('needs_info'), questions: z.array(questionSchema).min(1).max(4) }),
+  z.object({
+    status: z.literal('needs_info'),
+    questions: z.array(questionSchema).min(1).max(4),
+  }),
 ]);
 
 export const analyzeResponseSchema = z.object({ analysis: analysisSchema });
@@ -61,10 +64,7 @@ export const analyzeRequestSchema = z.union([
   z.object({
     dilemma: z.string().trim().min(1).max(MAX_DILEMMA_LENGTH),
     questions: z.array(questionSchema).min(1).max(4),
-    answers: z
-      .array(z.string().max(MAX_ANSWER_LENGTH))
-      .min(1)
-      .max(4),
+    answers: z.array(z.string().max(MAX_ANSWER_LENGTH)).min(1).max(4),
   }),
 ]);
 
