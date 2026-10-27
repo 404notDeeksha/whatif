@@ -26,6 +26,7 @@ npm run dev --prefix server  # starts on http://localhost:3000
 
 | Name | Required | Purpose |
 |---|---|---|
-| `OPENAI_API_KEY` | Yes (warns until wired) | LLM access for `/api/analyze` |
+| `OPENAI_API_KEY` | Yes (warns until wired) | Key for your LLM provider |
+| `OPENAI_BASE_URL` | No | For free providers (Gemini, Groq). Leave out to use OpenAI itself |
+| `OPENAI_MODEL` | No | Model name. Default `gpt-4o-mini` |
 | `PORT` | No | Default 3000 |
-| `OPENAI_MODEL` | No | Default `gpt-4o-mini` |

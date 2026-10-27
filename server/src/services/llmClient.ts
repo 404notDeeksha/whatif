@@ -23,7 +23,10 @@ export class LlmOutputError extends Error {
 let client: OpenAI | null = null;
 function getClient(): OpenAI {
   if (!client) {
-    client = new OpenAI({ apiKey: env.openaiApiKey });
+    client = new OpenAI({
+      apiKey: env.openaiApiKey,
+      baseURL: env.baseUrl, // undefined = real OpenAI
+    });
   }
   return client;
 }
@@ -42,7 +45,7 @@ export async function callLlm<T>(opts: {
 
   try {
     const completion = await getClient().chat.completions.create({
-      model: env.openaiModel,
+      model: env.model,
       response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: opts.prompt }],
     });

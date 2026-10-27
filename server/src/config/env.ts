@@ -14,5 +14,6 @@ function envOrWarn(name: string, fallback: string): string {
 export const env = {
   port: Number(process.env.PORT) || 3000,
   openaiApiKey: envOrWarn('OPENAI_API_KEY', ''),
-  openaiModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+  model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+  baseUrl: process.env.OPENAI_BASE_URL, // optional: any OpenAI-compatible provider
 } as const;
