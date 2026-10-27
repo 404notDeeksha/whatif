@@ -35,15 +35,19 @@ export async function analyze(
     };
   }
 
-  const data = (await res.json().catch(() => null)) as
-    | { questions?: unknown; analysis?: unknown; error?: unknown; message?: unknown }
-    | null;
+  const data = (await res.json().catch(() => null)) as {
+    questions?: unknown;
+    analysis?: unknown;
+    error?: unknown;
+    message?: unknown;
+  } | null;
 
   if (res.status === 422 && data?.error === 'unsupported_input') {
     return {
       kind: 'unsupported_input',
       message:
-        (data.message as string) ?? "This doesn't look like a decision. Try rephrasing.",
+        (data.message as string) ??
+        "This doesn't look like a decision. Try rephrasing.",
     };
   }
 
