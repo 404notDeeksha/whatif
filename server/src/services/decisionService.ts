@@ -44,7 +44,27 @@ export async function runDecision(input: DecisionInput): Promise<DecisionOutcome
     payload.answers = input.answers;
   }
 
-  const prompt = `${systemPrompt}\n\nInput:\n${JSON.stringify(payload)}`;
+  // Two assembly-time nudges (Phase 3 addition; the frozen Phase 2 prompt is
+  // never edited): free/live models occasionally ignore the mode or overrun
+  // lengths, so restate the contract right before the payload.
+  const modeNudge =
+    input.stage === 'analyze'
+      ? `Mode is "analyze": you MUST return exactly one JSON object with the key
+"analysis" — do NOT ask questions now; the user's answers are above.`
+      : `Mode is "assess": return EITHER questions OR an analysis, never both.`;
+  const brevityNudge = `Keep every list item to one short line (under ~15 words).
+Keep sentences short; respect all length limits in the rules.`;
+
+  const prompt = [
+    systemPrompt,
+    '',
+    '## Call instructions (binding)',
+    modeNudge,
+    brevityNudge,
+    '',
+    'Input:',
+    JSON.stringify(payload),
+  ].join('\n');
 
   // The model may reply with the unsupported-input error object in any mode,
   // so always allow it in the schema and route on the shape afterwards.
