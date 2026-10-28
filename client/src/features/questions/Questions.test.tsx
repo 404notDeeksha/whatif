@@ -20,7 +20,7 @@ const analysisPayload = {
       { name: 'B', pros: [], cons: [], tradeoffs: [] },
     ],
     blindSpot: 'b',
-    recommendation: { choice: 'A', reasoning: 'r', changeIf: [] },
+    recommendation: { choice: 'A', reasoning: 'r', changeIf: ['if learning matters more'] },
     brief: false,
   },
 };
@@ -71,8 +71,10 @@ describe('end-to-end questions journey (mocked fetch)', () => {
     await user.type(screen.getByLabelText(/Answer: /), '3500');
     await user.click(screen.getByText('Get my answer'));
 
-    await screen.findByText(/journey continues next step/i); // interim results view until step 6
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await screen.findByText(/recommended/); // results screen: option marked
+    expect(screen.getByText(/restated/i)).toBeInTheDocument();
+    expect(screen.getByText(/would change if/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Start over' })).toBeInTheDocument();
     const secondBody = JSON.parse(
       (fetchMock.mock.calls[1]![1] as { body: string }).body,
     );
@@ -116,7 +118,7 @@ describe('end-to-end questions journey (mocked fetch)', () => {
     render(<App />);
     await typeAndSubmit('clear case')();
 
-    await screen.findByText(/journey continues next step/i);
+    await screen.findByText(/restated/i); // results screen rendered
     await userEvent.setup().click(screen.getByRole('button', { name: 'Start over' }));
 
     expect(screen.getByLabelText(/What's your dilemma/)).toBeInTheDocument();

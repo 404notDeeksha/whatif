@@ -2,6 +2,7 @@ import { JourneyProvider, useJourney } from './features/journey/JourneyContext.j
 import { DilemmaInput } from './features/dilemma/DilemmaInput.js';
 import { Questions } from './features/questions/Questions.js';
 import { Loading } from './components/Loading.js';
+import { Results } from './features/results/Results.js';
 import type { AnalyzeOutcome } from './types/analysis.js';
 
 function OutcomeView({
@@ -31,21 +32,23 @@ function OutcomeView({
       </div>
     );
   }
-  // Questions and full results get dedicated screens in the next steps.
-  return (
-    <div className="mx-auto max-w-xl space-y-4">
-      <p className="text-lg font-medium">Got it — journey continues next step.</p>
-      <pre className="max-h-96 overflow-auto rounded-xl bg-zinc-100 p-4 text-xs">
-        {JSON.stringify(outcome, null, 2)}
-      </pre>
-      <button
-        onClick={onReset}
-        className="rounded-full border border-zinc-300 px-6 py-2"
-      >
-        Start over
-      </button>
-    </div>
-  );
+  if (outcome.kind === 'questions') return <Questions />;
+
+  if (outcome.kind === 'analysis') {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <Results analysis={outcome.analysis} />
+        <div className="mt-2 flex justify-center">
+          <button
+            onClick={onReset}
+            className="rounded-full border border-zinc-300 px-6 py-2"
+          >
+            Start over
+          </button>
+        </div>
+      </div>
+    );
+  }
 }
 
 function Screen() {
