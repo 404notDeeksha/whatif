@@ -1,5 +1,6 @@
 import { JourneyProvider, useJourney } from './features/journey/JourneyContext.js';
 import { DilemmaInput } from './features/dilemma/DilemmaInput.js';
+import { Questions } from './features/questions/Questions.js';
 import type { AnalyzeOutcome } from './types/analysis.js';
 
 function OutcomeView({
@@ -57,23 +58,7 @@ function Screen() {
         {phase.stage === 'analyzing' && (
           <p className="text-center text-zinc-600">Thinking it through…</p>
         )}
-        {phase.stage === 'questions' && (
-          // Interim: real questions screen lands in the next commit.
-          <div className="mx-auto max-w-xl space-y-4">
-            <p className="text-lg font-medium">
-              The AI asked {phase.questions.length} question(s).
-            </p>
-            <pre className="max-h-96 overflow-auto rounded-xl bg-zinc-100 p-4 text-xs">
-              {JSON.stringify(phase.questions, null, 2)}
-            </pre>
-            <button
-              onClick={reset}
-              className="rounded-full border border-zinc-300 px-6 py-2"
-            >
-              Start over
-            </button>
-          </div>
-        )}
+        {phase.stage === 'questions' && <Questions />}
         {phase.stage === 'results' && (
           <OutcomeView
             dilemma={phase.dilemma}
