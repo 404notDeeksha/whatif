@@ -1,12 +1,6 @@
-import { useState } from 'react';
+import { JourneyProvider, useJourney } from './features/journey/JourneyContext.js';
 import { DilemmaInput } from './features/dilemma/DilemmaInput.js';
-import { analyze } from './services/analyze.js';
-import type { AnalyzeBody, AnalyzeOutcome } from './types/analysis.js';
-
-type Phase =
-  | { stage: 'input' }
-  | { stage: 'loading'; dilemma: string }
-  | { stage: 'outcome'; dilemma: string; outcome: AnalyzeOutcome };
+import type { AnalyzeOutcome } from './types/analysis.js';
 
 function OutcomeView({
   dilemma,
@@ -52,32 +46,50 @@ function OutcomeView({
   );
 }
 
-export function App() {
-  const [phase, setPhase] = useState<Phase>({ stage: 'input' });
-
-  const start = (dilemma: string) => {
-    setPhase({ stage: 'loading', dilemma: dilemma });
-    void analyze({ dilemma: dilemma } satisfies AnalyzeBody).then((outcome) =>
-      setPhase({ stage: 'outcome', dilemma: dilemma, outcome: outcome }),
-    );
-  };
+function Screen() {
+  const { phase, reset } = useJourney();
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-200 p-6 text-zinc-900">
       <div className="w-full">
         <h1 className="mb-8 text-center text-3xl font-semibold">whatIf</h1>
-        {phase.stage === 'input' && <DilemmaInput onSubmit={start} />}
-        {phase.stage === 'loading' && (
+        {phase.stage === 'input' && <DilemmaInput />}
+        {phase.stage === 'analyzing' && (
           <p className="text-center text-zinc-600">Thinking it through…</p>
         )}
-        {phase.stage === 'outcome' && (
+        {phase.stage === 'questions' && (
+          // Interim: real questions screen lands in the next commit.
+          <div className="mx-auto max-w-xl space-y-4">
+            <p className="text-lg font-medium">
+              The AI asked {phase.questions.length} question(s).
+            </p>
+            <pre className="max-h-96 overflow-auto rounded-xl bg-zinc-100 p-4 text-xs">
+              {JSON.stringify(phase.questions, null, 2)}
+            </pre>
+            <button
+              onClick={reset}
+              className="rounded-full border border-zinc-300 px-6 py-2"
+            >
+              Start over
+            </button>
+          </div>
+        )}
+        {phase.stage === 'results' && (
           <OutcomeView
             dilemma={phase.dilemma}
             outcome={phase.outcome}
-            onReset={() => setPhase({ stage: 'input' })}
+            onReset={reset}
           />
         )}
       </div>
     </main>
+  );
+}
+
+export function App() {
+  return (
+    <JourneyProvider>
+      <Screen />
+    </JourneyProvider>
   );
 }
