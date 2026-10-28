@@ -63,7 +63,7 @@ export function App() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 p-6 text-zinc-900">
+    <main className="flex min-h-screen items-center justify-center bg-zinc-200 p-6 text-zinc-900">
       <div className="w-full">
         <h1 className="mb-8 text-center text-3xl font-semibold">whatIf</h1>
         {phase.stage === 'input' && <DilemmaInput onSubmit={start} />}
